@@ -13,7 +13,6 @@ import tempfile
 from app.model import ContrastiveModel, extract_features
 from joblib import load
 
-# Create FastAPI app
 app = FastAPI(title="EEG Stress Detection")
 
 # Get the absolute path to the project root
