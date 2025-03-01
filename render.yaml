@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: empath-eeg
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: PORT
+        value: 8000
+      - key: PYTHONPATH
+        value: .
+    healthCheckPath: /health
+    healthCheckTimeout: 300
+    staticPublishPath: ./static 
