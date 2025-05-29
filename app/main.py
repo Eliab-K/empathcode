@@ -1,3 +1,8 @@
+from starlette.middleware.sessions import SessionMiddleware
+
+# Add session middleware (insert this after app is defined)
+app.add_middleware(SessionMiddleware, secret_key="your-super-secret-key")
+
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -97,21 +102,18 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    print("Accessing home route")
-    try:
-        return templates.TemplateResponse(
-            "index.html", 
-            {
-                "request": request,
-                "app_name": "EEG Stress Detection"
-            }
-        )
-    except Exception as e:
-        print(f"Error rendering template: {str(e)}")
-        # Log more details about the error
-        import traceback
-        print(traceback.format_exc())
-        return HTMLResponse(content=f"Error: {str(e)}", status_code=500)
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+
+    return templates.TemplateResponse(
+        "index.html", 
+        {
+            "request": request,
+            "app_name": "EEG Stress Detection",
+            "user": user
+        }
+    )
 
 @app.head("/")
 async def head_root():
@@ -300,6 +302,30 @@ async def analyze(file: UploadFile = File(...)):
                 }
             }
         )
+from fastapi import Form
+from fastapi.responses import RedirectResponse
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_get(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request, "error": None, "app_name": "EEG Stress Detection"})
+
+@app.post("/login", response_class=HTMLResponse)
+async def login_post(request: Request, email: str = Form(...), password: str = Form(...)):
+    # Dummy authentication — replace with real logic later
+    if email == "user@example.com" and password == "password":
+        request.session["user"] = email
+        return RedirectResponse(url="/", status_code=302)
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "error": "Invalid credentials.",
+        "app_name": "EEG Stress Detection"
+    })
+
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=302)
+
 
 # Make sure app is available at module level
 if __name__ == "__main__":
