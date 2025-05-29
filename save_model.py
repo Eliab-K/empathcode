@@ -1,7 +1,14 @@
-import torch
-from model import ContrastiveModel
+from fastapi import FastAPI
+from app.main import router
+from starlette.middleware.sessions import SessionMiddleware
 
-# Assuming 'model' is your trained model
-model_path = "contrastive_model.pth"
-torch.save(model.state_dict(), model_path)
-print(f"Model saved to {model_path}")
+app = FastAPI()
+
+# Mount all routes from main.py
+app.include_router(router)
+
+# Enable session management (for login)
+app.add_middleware(SessionMiddleware, secret_key="your_secret_key")  # Change this key in production
+
+# Re-export the app for deployment tools
+application = app
