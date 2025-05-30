@@ -1,18 +1,14 @@
-from starlette.middleware.sessions import SessionMiddleware
-
-# Add session middleware (insert this after app is defined)
-app.add_middleware(SessionMiddleware, secret_key="your-super-secret-key")
-
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.model import ContrastiveModel, extract_features
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Form
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.background import BackgroundTasks
+from starlette.middleware.sessions import SessionMiddleware
 import torch
 import numpy as np
 from pathlib import Path
@@ -23,6 +19,9 @@ from app.model import ContrastiveModel, extract_features
 from joblib import load
 
 app = FastAPI(title="EEG Stress Detection")
+
+# Add session middleware AFTER app is created
+app.add_middleware(SessionMiddleware, secret_key="your-super-secret-key-change-this-in-production")
 
 # Get the absolute path to the project root
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,6 +99,34 @@ async def startup_event():
     if not load_model():
         print("WARNING: Failed to load model during startup!")
 
+# LOGIN ROUTES
+@app.get("/login", response_class=HTMLResponse)
+async def login_get(request: Request):
+    return templates.TemplateResponse("login.html", {
+        "request": request, 
+        "error": None, 
+        "app_name": "EEG Stress Detection"
+    })
+
+@app.post("/login")
+async def login_post(request: Request, email: str = Form(...), password: str = Form(...)):
+    # Dummy authentication — replace with real logic later
+    if email == "user@example.com" and password == "password":
+        request.session["user"] = email
+        return RedirectResponse(url="/", status_code=302)
+    
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "error": "Invalid credentials.",
+        "app_name": "EEG Stress Detection"
+    })
+
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=302)
+
+# MAIN ROUTES
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     user = request.session.get("user")
@@ -302,34 +329,8 @@ async def analyze(file: UploadFile = File(...)):
                 }
             }
         )
-from fastapi import Form
-from fastapi.responses import RedirectResponse
-
-@app.get("/login", response_class=HTMLResponse)
-async def login_get(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "error": None, "app_name": "EEG Stress Detection"})
-
-@app.post("/login", response_class=HTMLResponse)
-async def login_post(request: Request, email: str = Form(...), password: str = Form(...)):
-    # Dummy authentication — replace with real logic later
-    if email == "user@example.com" and password == "password":
-        request.session["user"] = email
-        return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("login.html", {
-        "request": request,
-        "error": "Invalid credentials.",
-        "app_name": "EEG Stress Detection"
-    })
-
-@app.get("/logout")
-async def logout(request: Request):
-    request.session.clear()
-    return RedirectResponse(url="/login", status_code=302)
-
 
 # Make sure app is available at module level
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-# Rest of your routes remain the same... 
