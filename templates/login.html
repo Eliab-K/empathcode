@@ -20,6 +20,7 @@
     </style>
 </head>
 <body>
+    <script>if(window.location.protocol === 'file:' && window.location.search !== '?loggedin') window.location.href = 'login.html';</script>
     <div class="container">
         <div class="login-container">
             <div class="card">
@@ -28,7 +29,7 @@
                     
                     
                     
-                    <form method="POST" action="/login">
+                    <form method="POST" action="/login" onsubmit="if(window.location.protocol === 'file:') { event.preventDefault(); window.location.href = 'index.html'; return false; }">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" 
@@ -67,6 +68,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>document.querySelector('form').addEventListener('submit', function(e) { if (window.location.protocol === 'file:') { e.preventDefault(); window.location.href = 'index.html'; } });</script>
 </body>
 </html>
