@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./appDockerfile
+    restart: unless-stopped
+    init: true
+    depends_on:
+      - database
+    networks:
+      - app_network
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+volumes:
+  db_data:
+networks:
+  app_network:
