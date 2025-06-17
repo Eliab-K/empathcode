@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-<<<<<<< HEAD
-from app.main import router
-=======
+#<<<<<<< HEAD
 #from app.main import router
->>>>>>> master
+#=======
+#from app.main import router
+#>>>>>>> master
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI()
@@ -12,4 +12,4 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="supersecret")  
 
 # Re-export the app for deployment tools
-application = app
+#application = a
