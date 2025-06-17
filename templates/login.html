@@ -20,32 +20,14 @@
     </style>
 </head>
 <body>
-<<<<<<< HEAD
-=======
-    <script>if(window.location.protocol === 'file:' && window.location.search !== '?loggedin') window.location.href = 'login.html';</script>
->>>>>>> master
     <div class="container">
         <div class="login-container">
             <div class="card">
                 <div class="card-body p-4">
-<<<<<<< HEAD
-                    <h2 class="text-center mb-4">Login to {{ app_name }}</h2>
-                    
-                    <!-- Error message display -->
-                    {% if error %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ error }}
-                        </div>
-                    {% endif %}
-                    
-                    <form method="POST" action="/login">
-=======
                     <h2 class="text-center mb-4">Login to EMPATH</h2>
                     
                     
-                    
-                    <form method="POST" action="/login" onsubmit="if(window.location.protocol === 'file:') { event.preventDefault(); window.location.href = 'index.html'; return false; }">
->>>>>>> master
+                    <form method="POST" action="/login">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" 
@@ -70,20 +52,7 @@
                             Login
                         </button>
                     </form>
-                    
-                    <!-- Demo credentials info -->
-                    <div class="text-center">
-                        <small class="text-muted">
-<<<<<<< HEAD
-                            <strong>Demo Credentials:</strong><br>
-                            Email: user@example.com<br>
-                            Password: password
-=======
-                            <strong>SECURITY NOTICE:</strong><br>
-                            Please note that user data is protected and password encrypted.<br>    
->>>>>>> master
-                        </small>
-                    </div>
+        
                 </div>
             </div>
         </div>
