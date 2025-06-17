@@ -9,6 +9,7 @@
     <style>
         body {
             background-color: #f5f5f5;
+            padding-top: 56px; /* Add padding for fixed navbar */
         }
 
         .main-content {
@@ -35,9 +36,9 @@
 
         .sidebar {
             position: fixed;
-            top: 0;
+            top: 56px; /* Start below navbar */
             left: 0;
-            height: 100vh;
+            height: calc(100vh - 56px); /* Adjust height for navbar */
             width: 300px;
             background-color: #f8f9fa;
             border-right: 1px solid #dee2e6;
@@ -45,9 +46,44 @@
             overflow-y: auto;
             z-index: 1000;
         }
+        
+        /* Ensure navbar stays on top */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
     </style>
 </head>
 <body>
+    <!-- New Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">EMPATH</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="main-content">
         <div class="container mt-5">
             <h1 class="text-center mb-4">EMPATH STRESS DETECTION</h1>
@@ -81,53 +117,46 @@
     </div>
 
     <div class="sidebar">
-        <h5>EMPATH Info</h5>
+        <h5>WELCOME!</h5>
         <hr>
         
-        <h6>Navigation</h6>
-        <ul class="list-unstyled">
-            <li><a href="#" class="text-decoration-none">About</a></li>
-            <li><a href="#" class="text-decoration-none">Documentation</a></li>
-            <li><a href="#" class="text-decoration-none">Contact</a></li>
-            <li><a href="#" class="text-decoration-none">Logout</a></li>
-        </ul>
-        <hr>
+        <!-- Removed duplicate navigation links from sidebar -->
         
         <div class="accordion" id="infoAccordion">
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileRequirements" aria-expanded="false" aria-controls="fileRequirements">
-        File Requirements
-      </button>
-    </h2>
-    <div id="fileRequirements" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
-      <div class="accordion-body">
-        <small class="text-muted">
-          • Format: Only .edf files are supported<br>
-          • Maximum size: 50MB<br>
-          • Processing: 3-15 seconds per file
-        </small>
-      </div>
-    </div>
-  </div>
-  
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#howItWorks" aria-expanded="false" aria-controls="howItWorks">
-        How It Works
-      </button>
-    </h2>
-    <div id="howItWorks" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
-      <div class="accordion-body">
-        <small class="text-muted">
-          1. Upload your EEG file<br>
-          2. Using AI, the brain patterns are analysed<br>
-          3. The stress levels are deduced
-        </small>
-      </div>
-    </div>
-  </div>
-</div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileRequirements" aria-expanded="false" aria-controls="fileRequirements">
+                        File Requirements
+                    </button>
+                </h2>
+                <div id="fileRequirements" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                    <div class="accordion-body">
+                        <small class="text-muted">
+                            • Format: Only .edf files are supported<br>
+                            • Maximum size: 50MB<br>
+                            • Processing: 3-15 seconds per file
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#howItWorks" aria-expanded="false" aria-controls="howItWorks">
+                        How It Works
+                    </button>
+                </h2>
+                <div id="howItWorks" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                    <div class="accordion-body">
+                        <small class="text-muted">
+                            1. Upload your EEG file<br>
+                            2. Using AI, the brain patterns are analysed<br>
+                            3. The stress levels are deduced
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
