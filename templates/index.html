@@ -22,7 +22,7 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+            background: linear-gradient(135deg, #0a3c68 0%, #083263 100%);
         }
 
         #results {
@@ -55,6 +55,15 @@
             right: 0;
             z-index: 1030;
         }
+
+        /* Added for results display */
+        .wave-metric {
+            font-weight: 500;
+        }
+        .stress-badge {
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +92,9 @@
             </div>
         </div>
     </nav>
-
+    <!-- Try with different path formats -->
+<img src="C:\Users\Uncle Shimmy\Desktop\working code\EMPATH-PROJECT\img\1.jpg" alt="test" style="width: 600px;">
+     
     <div class="main-content">
         <div class="container mt-5">
             <h1 class="text-center mb-4">EMPATH STRESS DETECTION</h1>
@@ -108,6 +119,8 @@
 
                             <div id="results" class="mt-4" style="display: none;">
                                 <div id="resultAlert" class="alert" role="alert"></div>
+                                <!-- Added detailed results container -->
+                                <div id="resultDetails" class="mt-3"></div>
                             </div>
                         </div>
                     </div>
@@ -119,8 +132,6 @@
     <div class="sidebar">
         <h5>WELCOME!</h5>
         <hr>
-        
-        <!-- Removed duplicate navigation links from sidebar -->
         
         <div class="accordion" id="infoAccordion">
             <div class="accordion-item">
@@ -160,6 +171,120 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/main.js"></script>
+    <script>
+        // Enhanced JavaScript for file processing
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('eegFile');
+            const file = fileInput.files[0];
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const resultAlert = document.getElementById('resultAlert');
+            const resultDetails = document.getElementById('resultDetails');
+
+            if (!file) {
+                showAlert('Please select an EDF file first', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('eeg_file', file);
+
+            try {
+                loading.style.display = 'block';
+                results.style.display = 'none';
+                resultDetails.innerHTML = '';
+
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Server error');
+                }
+
+                displayResults(data);
+                
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'danger');
+                console.error('Processing error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        function displayResults(data) {
+            const resultDetails = document.getElementById('resultDetails');
+            
+            // Basic result alert
+            showAlert('Analysis completed successfully!', 'success');
+            
+            // Detailed results
+            resultDetails.innerHTML = `
+                <div class="card mt-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">EEG Analysis Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Stress Level:</h6>
+                                <div class="alert alert-${getStressColor(data.stress_level)} mb-3">
+                                    <span class="stress-badge">${data.stress_level.toUpperCase()}</span>
+                                    <div class="mt-2">Confidence: ${data.confidence}%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Brain Wave Metrics:</h6>
+                                <ul class="list-group">
+                                    ${Object.entries(data.wave_metrics).map(([wave, value]) => `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="wave-metric">${wave.toUpperCase()}</span>
+                                            <span class="badge bg-primary rounded-pill">${value.toFixed(4)}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        ${data.recommendations && data.recommendations.length ? `
+                        <div class="mt-4">
+                            <h6>Recommendations:</h6>
+                            <div class="alert alert-info">
+                                <ul class="mb-0">
+                                    ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Helper functions
+        function showAlert(message, type) {
+            const alert = document.getElementById('resultAlert');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = message;
+            alert.style.display = 'block';
+        }
+
+        function getStressColor(level) {
+            const levels = {
+                'low': 'success',
+                'normal': 'info',
+                'moderate': 'warning',
+                'high': 'danger'
+            };
+            return levels[level.toLowerCase()] || 'primary';
+        }
+    </script>
 </body>
 </html>

@@ -9,7 +9,7 @@ body {
 }
 
 .card-header {
-    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+    background: linear-gradient(135deg, #06355f 0%, #07305f 100%);
 }
 
 #results {
@@ -38,4 +38,17 @@ body {
 .container.mt-5 {
     width: calc(100% - 320px) !important;
     max-width: calc(100% - 320px) !important;
+}
+
+.hero-image {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
