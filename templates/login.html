@@ -249,7 +249,6 @@
   .dark-toggle input[type="checkbox"]:checked::before {
     left: 19px;
   }
-
 </style>
 </head>
 <body class="dark">
@@ -258,7 +257,6 @@
   <video id="bgVideo" autoplay muted loop playsinline style="display:none;">
     <source src="https://cdn.videvo.net/videvo_files/video/free/2019-08/small_watermarked/190727_02_Drone_08_preview.webm" type="video/webm" />
     <source src="https://cdn.videvo.net/videvo_files/video/free/2019-08/small_watermarked/190727_02_Drone_08_preview.mp4" type="video/mp4" />
-    <!-- fallback -->
   </video>
   <div id="videoOverlay"></div>
 
@@ -274,7 +272,6 @@
 
   <!-- Container -->
   <div class="container" id="container">
-
     <h2 id="formTitle">Login</h2>
 
     <div class="error-box" id="errorBox" style="display:none;">
@@ -330,13 +327,11 @@
     if (m === 'light') {
       body.classList.remove('dark');
       body.classList.add('light');
-      // Show video bg
       bgVideo.style.display = 'block';
       videoOverlay.style.display = 'block';
     } else {
       body.classList.remove('light');
       body.classList.add('dark');
-      // Hide video bg
       bgVideo.style.display = 'none';
       videoOverlay.style.display = 'none';
     }
@@ -359,6 +354,7 @@
     errorBox.style.display = 'none';
     animateEntrance();
   });
+
   toLogin.addEventListener('click', () => {
     registerForm.style.display = 'none';
     loginForm.style.display = 'block';
@@ -373,18 +369,29 @@
   document.getElementById('loginShowPass').addEventListener('change', e => {
     loginForm.querySelector('input[type="password"]').type = e.target.checked ? 'text' : 'password';
   });
+
   document.getElementById('registerShowPass').addEventListener('change', e => {
     registerForm.querySelector('input[type="password"]').type = e.target.checked ? 'text' : 'password';
   });
 
-  // Simulate error on login submit for demo shake animation
-  loginForm.addEventListener('submit', e => {
+  // ====== UPDATED LOGIN HANDLER ======
+  loginForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    // Show error and shake animation
-    errorBox.style.display = 'block';
-    errorBox.classList.remove('shake');
-    void errorBox.offsetWidth; // trigger reflow to restart animation
-    errorBox.classList.add('shake');
+    
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value.trim();
+    
+    if (username && password) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        window.location.href = 'index.html';
+    } else {
+        errorBox.textContent = "Please enter both username and password";
+        errorBox.style.display = 'block';
+        errorBox.classList.remove('shake');
+        void errorBox.offsetWidth;
+        errorBox.classList.add('shake');
+    }
   });
 
   registerForm.addEventListener('submit', e => {
@@ -392,7 +399,7 @@
     alert('Registration submitted! (replace this with real logic)');
   });
 
-  // Entrance animation on container and title
+  // Entrance animation
   function animateEntrance() {
     const container = document.querySelector('.container');
     const title = formTitle;
@@ -411,7 +418,7 @@
     }, 50);
   }
 
-  // Simple floating particles effect using canvas
+  // Particles effect
   const canvas = document.getElementById('particles');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -465,17 +472,14 @@
     requestAnimationFrame(animateParticles);
   }
 
-  // On resize, reset canvas
   window.addEventListener('resize', () => {
     initCanvas();
     initParticles();
   });
 
-  // Initialize all
   initCanvas();
   initParticles();
   animateParticles();
 </script>
-
 </body>
 </html>
