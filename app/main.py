@@ -113,7 +113,7 @@ async def login_post(request: Request, email: str = Form(...), password: str = F
     # Dummy authentication — replace with real logic later
     if email == "user@example.com" and password == "password":
         request.session["user"] = email
-        return RedirectResponse(url="/", status_code=302)
+        return RedirectResponse(url="/index", status_code=302)
     
     return templates.TemplateResponse("login.html", {
         "request": request,
