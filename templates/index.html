@@ -92,8 +92,9 @@
             </div>
         </div>
     </nav>
-    <!-- Try with different path formats -->
-<img src="C:\Users\Uncle Shimmy\Desktop\working code\EMPATH-PROJECT\img\1.jpg" alt="test" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 20px;">
+    <!-- Image kept exactly as in original -->
+    <img src="C:\Users\Uncle Shimmy\Desktop\working code\EMPATH-PROJECT\img\1.jpg" alt="test" style="width: 100%; height: 200px; object-fit: cover; margin-bottom: 20px;">
+    
     <div class="main-content">
         <div class="container mt-5">
             <h1 class="text-center mb-4">EMPATH STRESS DETECTION</h1>
@@ -101,12 +102,15 @@
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-body">
-                            <form id="uploadForm">
+                            <!-- Only added enctype to form -->
+                            <form id="uploadForm" enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <label for="eegFile" class="form-label">Upload EEG File (.edf)</label>
                                     <input type="file" class="form-control" id="eegFile" accept=".edf" required>
+                                    <!-- Added validation feedback -->
+                                    <div class="invalid-feedback">Please select a valid .edf file (max 50MB)</div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Analyze</button>
+                                <button type="submit" class="btn btn-primary" id="analyzeBtn">Analyze</button>
                             </form>
 
                             <div id="loading" class="text-center mt-4" style="display: none;">
@@ -118,7 +122,6 @@
 
                             <div id="results" class="mt-4" style="display: none;">
                                 <div id="resultAlert" class="alert" role="alert"></div>
-                                <!-- Added detailed results container -->
                                 <div id="resultDetails" class="mt-3"></div>
                             </div>
                         </div>
@@ -176,119 +179,131 @@
             window.location.href = 'login.html';
         }
 
-        // Enhanced JavaScript for file processing
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const fileInput = document.getElementById('eegFile');
-            const file = fileInput.files[0];
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('uploadForm');
+            const analyzeBtn = document.getElementById('analyzeBtn');
             const loading = document.getElementById('loading');
             const results = document.getElementById('results');
             const resultAlert = document.getElementById('resultAlert');
             const resultDetails = document.getElementById('resultDetails');
+            const fileInput = document.getElementById('eegFile');
 
-            if (!file) {
-                showAlert('Please select an EDF file first', 'warning');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('eeg_file', file);
-
-            try {
-                loading.style.display = 'block';
-                results.style.display = 'none';
-                resultDetails.innerHTML = '';
-
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Server error');
+                const file = fileInput.files[0];
+
+                // Validate file
+                if (!file) {
+                    showAlert('Please select an EDF file first', 'warning');
+                    fileInput.classList.add('is-invalid');
+                    return;
+                }
+                
+                if (!file.name.toLowerCase().endsWith('.edf')) {
+                    showAlert('Only .edf files are accepted', 'danger');
+                    fileInput.classList.add('is-invalid');
+                    return;
+                }
+                
+                if (file.size > 50 * 1024 * 1024) {
+                    showAlert('File size exceeds 50MB limit', 'danger');
+                    fileInput.classList.add('is-invalid');
+                    return;
                 }
 
-                displayResults(data);
-                
-            } catch (error) {
-                showAlert(`Error: ${error.message}`, 'danger');
-                console.error('Processing error:', error);
-            } finally {
-                loading.style.display = 'none';
+                fileInput.classList.remove('is-invalid');
+
+                const formData = new FormData();
+                formData.append('eeg_file', file);
+
+                try {
+                    // UI State changes
+                    analyzeBtn.disabled = true;
+                    loading.style.display = 'block';
+                    results.style.display = 'none';
+                    resultDetails.innerHTML = '';
+
+                    const response = await fetch('http://localhost:5000/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Display results (your original display function)
+                    resultDetails.innerHTML = `
+                        <div class="card mt-3">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">EEG Analysis Results</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Stress Level:</h6>
+                                        <div class="alert alert-${getStressColor(data.stress_level)} mb-3">
+                                            <span class="stress-badge">${data.stress_level.toUpperCase()}</span>
+                                            <div class="mt-2">Confidence: ${data.confidence}%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Brain Wave Metrics:</h6>
+                                        <ul class="list-group">
+                                            ${Object.entries(data.wave_metrics).map(([wave, value]) => `
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span class="wave-metric">${wave.toUpperCase()}</span>
+                                                    <span class="badge bg-primary rounded-pill">${value.toFixed(4)}</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                ${data.recommendations && data.recommendations.length ? `
+                                <div class="mt-4">
+                                    <h6>Recommendations:</h6>
+                                    <div class="alert alert-info">
+                                        <ul class="mb-0">
+                                            ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    results.style.display = 'block';
+                    showAlert('Analysis completed successfully!', 'success');
+                    
+                } catch (error) {
+                    showAlert(`Error: ${error.message}`, 'danger');
+                    console.error('Processing error:', error);
+                } finally {
+                    analyzeBtn.disabled = false;
+                    loading.style.display = 'none';
+                }
+            });
+
+            function getStressColor(level) {
+                const levels = {
+                    'low': 'success',
+                    'normal': 'info',
+                    'moderate': 'warning',
+                    'high': 'danger'
+                };
+                return levels[level.toLowerCase()] || 'primary';
+            }
+
+            function showAlert(message, type) {
+                resultAlert.className = `alert alert-${type}`;
+                resultAlert.textContent = message;
+                resultAlert.style.display = 'block';
             }
         });
-
-        function displayResults(data) {
-            const resultDetails = document.getElementById('resultDetails');
-            
-            // Basic result alert
-            showAlert('Analysis completed successfully!', 'success');
-            
-            // Detailed results
-            resultDetails.innerHTML = `
-                <div class="card mt-3">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">EEG Analysis Results</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Stress Level:</h6>
-                                <div class="alert alert-${getStressColor(data.stress_level)} mb-3">
-                                    <span class="stress-badge">${data.stress_level.toUpperCase()}</span>
-                                    <div class="mt-2">Confidence: ${data.confidence}%</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Brain Wave Metrics:</h6>
-                                <ul class="list-group">
-                                    ${Object.entries(data.wave_metrics).map(([wave, value]) => `
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span class="wave-metric">${wave.toUpperCase()}</span>
-                                            <span class="badge bg-primary rounded-pill">${value.toFixed(4)}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        ${data.recommendations && data.recommendations.length ? `
-                        <div class="mt-4">
-                            <h6>Recommendations:</h6>
-                            <div class="alert alert-info">
-                                <ul class="mb-0">
-                                    ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('results').style.display = 'block';
-        }
-
-        // Helper functions
-        function showAlert(message, type) {
-            const alert = document.getElementById('resultAlert');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = message;
-            alert.style.display = 'block';
-        }
-
-        function getStressColor(level) {
-            const levels = {
-                'low': 'success',
-                'normal': 'info',
-                'moderate': 'warning',
-                'high': 'danger'
-            };
-            return levels[level.toLowerCase()] || 'primary';
-        }
 
         // Logout functionality
         document.getElementById('logoutLink').addEventListener('click', (e) => {
