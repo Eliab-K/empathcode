@@ -12,4 +12,4 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="supersecret")  
 
 # Re-export the app for deployment tools
-#application = a
+application = app
