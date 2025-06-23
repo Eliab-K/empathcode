@@ -127,7 +127,7 @@ async def logout(request: Request):
     return RedirectResponse(url="/login", status_code=302)
 
 # MAIN ROUTES
-@app.get("/", response_class=HTMLResponse)
+@app.get("/index", response_class=HTMLResponse)
 async def home(request: Request):
     user = request.session.get("user")
     if not user:
