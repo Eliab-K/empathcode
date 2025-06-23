@@ -48,6 +48,10 @@ model_loaded = False
 model_loading = False
 input_dim = 155  # Number of features (31 channels * 5 features per channel)
 
+@app.get("/")
+def read_root():
+    return JSONResponse(content={"message": "Welcome to Empath!"})
+
 def load_model():
     global model, model_loaded, model_loading
     try:
